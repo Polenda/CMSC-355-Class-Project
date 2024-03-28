@@ -3,6 +3,8 @@ import socket
 import threading
 import traceback
 
+from peerConnection import PeerConnection
+
 
 class Peer:
     def __init__(self, max_peers: int, serverport, my_id=None, serverhost=None):
@@ -68,16 +70,40 @@ class Peer:
         """Receive data from an individual peer that is connected to the server."""
         print(f"Connected {client_sock.getpeername()}")
 
-        # host, port = client_sock.getpeername()
-        # TODO: Create a PeerConnection class. Look at cs.berry.edu's btpeer.py for the example
-        # peer_connection = PeerConnection(None, host, port, client_sock)
+        host, port = client_sock.getpeername()
+        peer_connection = PeerConnection(None, host, port, client_sock)
 
-        while True:
-            try:
-                # Data received from another peer is a json object
-                packet: json = client_sock.recv(1024).decode('utf-8')
-                data = json.loads(packet)
-                print(data['MESSAGE'])
+        try:
+            # Data received from another peer is a json object
+            packet: json = client_sock.recv(1024).decode('utf-8')
+            data = json.loads(packet)
+            print(data['MESSAGE'])
 
-            except ConnectionError as _e:
-                pass
+        except KeyboardInterrupt as _e:
+            print("ERR - Keyboard interruption")
+            raise
+        except Exception as e:
+            print(f"ERROR: {e}")
+
+        peer_connection.close_peer_connection()
+
+    def send_to_peer(self, peer_id, msg_type, msg_data, wait_reply=True):
+        if self.router:
+            next_pid, host, port = self.router(peer_id)
+        if not self.router or not next_pid:
+            print(f"Unable to route {msg_type} to {peer_id}")
+            return None
+        return self.connect_and_send(host, port, msg_type, msg_data, pid=next_pid, wait_reply=wait_reply)
+
+    def connect_and_send(self, host, port, msg_type, msg_data, pid=None, wait_reply=True):
+        msg_reply = []
+        try:
+            peer_connection = PeerConnection(pid, host, port)
+            peer_connection.send_message(msg_type, msg_data)
+            print(f"Sent {pid}: {msg_type}")
+
+            if wait_reply:
+                one_reply = peer_connection.recvdata()
+                while(one_reply != (None, None)):
+                    msg_reply.append(one_reply)
+                    print(f"Got reply {pid}: {str[msg_reply]}")

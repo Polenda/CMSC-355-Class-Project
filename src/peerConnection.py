@@ -16,7 +16,7 @@ class PeerConnection:
             
         self.sd = self.s.makefile('rw', 0)
         
-    def makeMessage (self, messageType, messageData):
+    def make_message(self, messageType, messageData):
         # Creates a message
         messageLength = len(messageData)
         message = struct.pack(messageLength, messageType, messageLength, messageData)
@@ -24,7 +24,7 @@ class PeerConnection:
         return message
     
     
-    def sendMessage(self, messageType, messageData):
+    def send_message(self, messageType, messageData):
         # Sends a message through our peer connection which returns
         # True if successful
         # False if an error occurs
@@ -40,7 +40,7 @@ class PeerConnection:
             return False
         return True
     
-    def receiveMessage(self):
+    def receive_message(self):
         # Receives a message from a peer connection
         # returns (None, None) if there is an error
         try:
@@ -69,17 +69,36 @@ class PeerConnection:
         
         return(messageType, message)
     
-    def closePeerConnection(self):
+    def close_peer_connection(self):
         # Closes the peer connection
         # sendData and receiveData methods will not work once closePeerConnection is called
         self.s.close()
         self.s = None
         self.sd = None
-            
-            
-            
-    
-    
-    
-        
-        
+
+    def recvdata(self):
+        try:
+            msgtype = self.sd.read(4)
+            if not msgtype: return (None, None)
+
+            lenstr = self.sd.read(4)
+            msglen = int(struct.unpack("!L", lenstr)[0])
+            msg = ""
+
+            while len(msg) != msglen:
+                data = self.sd.read(min(2048, msglen - len(msg)))
+                if not len(data):
+                    break
+                msg += data
+
+            if len(msg) != msglen:
+                return (None, None)
+
+        except KeyboardInterrupt:
+            raise
+        except:
+            if self.debug:
+                traceback.print_exc()
+            return (None, None)
+
+        return (msgtype, msg)
