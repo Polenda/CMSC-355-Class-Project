@@ -3,11 +3,11 @@ import socket
 import threading
 import traceback
 
-from peerConnection import PeerConnection
+from src.peerConnection import PeerConnection
 
 
 class Peer:
-    def __init__(self, max_peers: int, serverport, my_id=None, serverhost=None):
+    def __init__(self, max_peers: int, serverport: int, my_id=None, serverhost=None):
         self.debug = 0
 
         self.max_peers = max_peers
@@ -107,3 +107,10 @@ class Peer:
                 while(one_reply != (None, None)):
                     msg_reply.append(one_reply)
                     print(f"Got reply {pid}: {str[msg_reply]}")
+            peer_connection.close_peer_connection()
+        except KeyboardInterrupt as _e:
+            print("ERR - Keyboard interruption")
+            raise
+        except Exception as e:
+            print(f"ERROR: {e}")
+        return msg_reply
