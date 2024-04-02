@@ -39,7 +39,7 @@ class Client:
     def write(self):
         """Get user message to send to server"""
         while True:
-            message = input()
+            message = input("> ")
             packet = f"{get_time()} :: {self.username}: {message}"
             self.client.send(packet.encode('ascii'))
 
@@ -51,9 +51,13 @@ def get_time() -> str:
 if __name__ == '__main__':
     while True:
         username: str = input("> Enter your username: ")
-        if len(username) < 13:
-            break
-        print("Please enter a username of at most 12 characters.\n")
+        if not 13 > len(username) > 0:
+            print("Please enter a username of at most 12 characters.\n")
+            continue
+        if not username.isalnum():
+            print("Please use alphanumeric characters (no special characters.)\n")
+            continue
+        break
 
     address: str = input("> Server IP address: ")         # 127.0.0.1
     port: int = int(input("> Server port number: "))      # 45100
