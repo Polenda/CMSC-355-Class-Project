@@ -37,14 +37,6 @@ class Server:
         while True:
             try:  # Get message from a client
                 message = client.recv(1024)
-                # print(
-                #     Received: IP:<ip>,
-                #     Port:<port>,
-                #     Client-Nickname:<Client Nickname>,
-                #     ClientID:<ClientID>,
-                #     Date/Time:<date/time>,
-                #     Msg-Size:<msg size>
-                # )
                 self.broadcast_message(message)
             except ConnectionError as _e:  # Kick user if unable to do so
                 self.disconnect_client(client)
@@ -76,7 +68,6 @@ def receive(serv: Server):
         try:
             client_info = json.loads(client_info_json)
             nickname = client_info['nickname']
-            clientID = client_info['clientID']  # TODO: Find a use for this
 
             # TODO: Check if user_name is the same as any existing users; if so then disconnect client
             if nickname in serv.nicknames:  # or user_id in serv.clients:

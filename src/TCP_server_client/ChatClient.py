@@ -1,25 +1,14 @@
-import sys
 import socket
 import threading
 import json
 from datetime import datetime
 
 
-# TODO: Packet structure between client and server should be this. Not a single string line
-# message_packet = {
-#     'type': 'message',        # initial packet when the user joins the server should be nickname
-#     'nickname': username,
-#     'message': message,
-#     'timestamp': get_time(),
-# }
-
-
 class Client:
-    def __init__(self, server_address, server_port, username, user_id):
+    def __init__(self, server_address, server_port, user_name):
         self.address = server_address
         self.port = server_port
-        self.username = username
-        self.id = user_id
+        self.username = user_name
 
         try:
             self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -28,7 +17,6 @@ class Client:
             client_info = {
                 "type": "nickname",
                 "nickname": self.username,
-                "clientID": self.id,
                 "timestamp": get_time(),
             }
             client_info_json = json.dumps(client_info)
@@ -36,7 +24,7 @@ class Client:
 
             print(f"ChatClient started with server IP: {self.address}, port: {self.port}, nickname: {self.username}, client ID: {self.id}")
         except Exception as e:
-            print(f"ERR - Unable to connect: {e}")
+            print(f"\nERR - Unable to connect: {e}")
 
     def receive(self):
         while True:
@@ -61,14 +49,16 @@ def get_time() -> str:
 
 
 if __name__ == '__main__':
-    # > python ChatClient.py 127.0.0.1 45100 Josh 001
-    address: str = sys.argv[1]  # '127.0.0.1'
-    port: int = int(sys.argv[2])  # 45100
-    client_name: str = sys.argv[3]
-    client_id: int = int(sys.argv[4])
-    # TODO: Detect for missing args (ERR - arg x (x indicates missing arg number))
+    while True:
+        username: str = input("> Enter your username: ")
+        if len(username) < 13:
+            break
+        print("Please enter a username of at most 12 characters.\n")
 
-    client = Client(address, port, client_name, client_id)
+    address: str = input("> Server IP address: ")         # 127.0.0.1
+    port: int = int(input("> Server port number: "))      # 45100
+
+    client = Client(address, port, username)
 
     receive_thread = threading.Thread(target=client.receive)
     receive_thread.start()
