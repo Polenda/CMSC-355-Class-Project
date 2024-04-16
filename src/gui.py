@@ -116,7 +116,7 @@ class Gui:
         send_button.grid(column=2, row=3, sticky=E)
 
         # cancel button
-        cancel_button = ttk.Button(content_frame, text="Cancel", command=self.close)
+        cancel_button = ttk.Button(content_frame, text="Cancel", command=self.cancel)
         cancel_button.grid(column=1, row=3, sticky=W)
 
         for child in content_frame.winfo_children():
@@ -129,6 +129,9 @@ class Gui:
     def close(self):
         self.window.destroy()
         root.destroy()
+
+    def cancel(self):
+        self.window.destroy()
     
     def login(self):
         print("Logging in {}".format(self.username.get()))
