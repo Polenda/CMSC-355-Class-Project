@@ -134,9 +134,16 @@ class Gui:
         self.window.destroy()
     
     def login(self):
+        if not 13 > len(self.username.get()) > 0:
+            print("Invalid username length (0 - 13)")
+            return
+        if not self.username.get().isalnum():
+            print("Invalid characters (Alphanumeric characters only)")
+            return
+
         print("Logging in {}".format(self.username.get()))
-        """REMOVE FOLLOWING LINE BEFORE SHIPPING"""
         print("Password: {}".format(self.password.get()))
+
         self.window.destroy()
         self.main_window(root)
 
