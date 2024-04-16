@@ -134,15 +134,28 @@ class Gui:
         self.window.destroy()
     
     def login(self):
-        if not 13 > len(self.username.get()) > 0:
+        username = self.username.get()
+        pw = self.password.get()
+
+        # USERNAME CHECKING
+        if not 13 > len(username) > 0:
             print("Invalid username length (0 - 13)")
             return
-        if not self.username.get().isalnum():
+        if not username.isalnum():
             print("Invalid characters (Alphanumeric characters only)")
             return
+        # if self.username.get() doesn't exist:
+        #   return
 
-        print("Logging in {}".format(self.username.get()))
-        print("Password: {}".format(self.password.get()))
+        # PASSWORD CHECKING
+        if not 100 > len(pw) > 4:
+            print("Invalid password size (4 - 100)")
+            return
+        # if pw doesn't match with the password of the username:
+        #   return
+
+        print(f"Logging in {username}")
+        print(f"Password: {pw}")
 
         self.window.destroy()
         self.main_window(root)
