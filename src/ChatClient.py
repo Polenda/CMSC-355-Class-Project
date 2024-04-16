@@ -3,6 +3,7 @@ import threading
 import json
 from datetime import datetime
 
+import gui
 
 class Client:
     def __init__(self, server_address, server_port, user_name):
@@ -23,6 +24,9 @@ class Client:
             self.client.send(client_info_json.encode('utf-8'))
 
             print(f"ChatClient started with server IP: {self.address}, port: {self.port}, nickname: {self.username}, client ID: {self.id}")
+
+            self.gui = gui
+            
         except Exception as e:
             print(f"\nERR - Unable to connect: {e}")
 
