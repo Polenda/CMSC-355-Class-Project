@@ -5,6 +5,7 @@ class Gui:
     def __init__(self, root):
         root.title("CMSC-355 Class Project")
 
+        # example users
         self.users = ["Red", "Blue", "Green"]
 
         self.login_window(root)
@@ -45,7 +46,7 @@ class Gui:
 
         # disconnect button
         # make it open login screen and also disconnect client from server
-        send_button = ttk.Button(content_frame, text="Disconnect", command=self.close)
+        send_button = ttk.Button(content_frame, text="Disconnect", command=self.disconnect)
         send_button.grid(column=1, row=2, sticky=(W, E))
 
         for child in content_frame.winfo_children():
@@ -70,33 +71,44 @@ class Gui:
 
         # username entry box
         self.username = StringVar()
-        username_entry = ttk.Entry(content_frame, width=20, textvariable=self.username)
-        username_entry.grid(column=2, row=1, sticky=(W, E))
+        self.username_label = ttk.Label(content_frame, text="Username:")
+        self.username_label.grid(column=1, row=1, columnspan=2, sticky=W, padx=5, pady=(5, 0))
+        username_entry = ttk.Entry(content_frame, width=40, textvariable=self.username)
+        username_entry.grid(column=1, row=2, columnspan=2, sticky=(W, E), padx=5, pady=5)
 
         # password entry box
         self.password = StringVar()
-        password_entry = ttk.Entry(content_frame, width=20, textvariable=self.password, show='*')
-        password_entry.grid(column=2, row=2, sticky=(W, E))
+        self.password_label = ttk.Label(content_frame, text="Password:")
+        self.password_label.grid(column=1, row=3, columnspan=2, sticky=W, padx=5, pady=(5, 0))
+        password_entry = ttk.Entry(content_frame, width=40, textvariable=self.password, show='*')
+        password_entry.grid(column=1, row=4, columnspan=2, sticky=(W, E), padx=5, pady=5)
 
         # login button
-        ttk.Label(content_frame, text="Username:").grid(column=1, row=1, sticky=E)
-        login_button = ttk.Button(content_frame, text="Login", default='active', command=self.login)
-        login_button.grid(column=2, row=3, sticky=E)
-        self.window.bind('<Key-Return>', lambda e:self.login())
+        login_button = ttk.Button(content_frame, text="Login", default='active', state='disabled', command=self.login)
+        login_button.grid(column=2, row=5, sticky=E, padx=5, pady=5)
+        self.window.bind('<Key-Return>', lambda e:login_button.invoke())
 
         # cancel button
-        ttk.Label(content_frame, text="Password:").grid(column=1, row=2, sticky=E)
-        cancel_button = ttk.Button(content_frame, text="Cancel", command=self.close)
-        cancel_button.grid(column=1, row=3, sticky=W)
-        self.window.bind('<Key-Escape>', lambda e:self.close())
+        cancel_button = ttk.Button(content_frame, text="Cancel", command=self.disconnect)
+        cancel_button.grid(column=1, row=5, sticky=W, padx=5, pady=5)
+        self.window.bind('<Key-Escape>', lambda e:cancel_button.invoke())
 
-        for child in content_frame.winfo_children():
-            child.grid_configure(padx=5, pady=5)
         username_entry.focus()
+
+        # enable login button if both username and password are filled
+        def check_fields(*args):
+            if self.username.get() and self.password.get():
+                login_button.config(state='normal')
+            else:
+                login_button.config(state='disabled')
+
+        self.username.trace_add('write', check_fields)
+        self.password.trace_add('write', check_fields)
 
     def send_window(self, root, *user):
         self.window = Toplevel(root)
         self.window.title("Send Message")
+        self.recipient = self.selected_user
 
         # main frame
         content_frame = ttk.Frame(self.window, padding='5 5 5 5')
@@ -106,33 +118,46 @@ class Gui:
         self.window.resizable(0, 0)
 
         # message box
-        ttk.Label(content_frame, text="Send message").grid(column=1, row=1, columnspan=2, sticky=(W, E))
+        ttk.Label(content_frame, text=f"Send Message to {self.recipient}:").grid(column=1, row=1, columnspan=2, sticky=(W, E))
         self.message = StringVar()
-        message_entry = Text(content_frame, width=40, height=10, wrap=WORD)
-        message_entry.grid(column=1, row=2, columnspan=2, sticky=(W, E))
+        self.message_entry = Text(content_frame, width=40, height=10, wrap='word')
+        self.message_entry.grid(column=1, row=2, columnspan=2, sticky=(W, E))
 
         # send button
-        send_button = ttk.Button(content_frame, text="Send", default='active')
+        send_button = ttk.Button(content_frame, text="Send", default='active', command=self.send)
         send_button.grid(column=2, row=3, sticky=E)
+        self.window.bind('<Key-Return>', lambda e:send_button.invoke())
 
         # cancel button
-        cancel_button = ttk.Button(content_frame, text="Cancel", command=self.cancel)
+        cancel_button = ttk.Button(content_frame, text="Cancel", command=self.close_window)
         cancel_button.grid(column=1, row=3, sticky=W)
+        self.window.bind('<Key-Escape>', lambda e:cancel_button.invoke())
 
         for child in content_frame.winfo_children():
             child.grid_configure(padx=5, pady=5)
-        message_entry.focus()
+        self.message_entry.focus()
 
+    # open window to send message
     def send_message(self, *user):
         self.send_window(root)
 
-    def close(self):
+    # send message
+    def send(self, *user):
+        message = self.message_entry.get('1.0', 'end-1c')
+        message = message[0:128]
+        print(f"Sending message to {self.recipient}: \"{message}\"")
+        self.close_window()
+
+    # disconnect from chat and close entire program
+    def disconnect(self):
         self.window.destroy()
         root.destroy()
 
-    def cancel(self):
+    # close invoking window
+    def close_window(self):
         self.window.destroy()
     
+    # login to chat and open main window
     def login(self):
         username = self.username.get()
         pw = self.password.get()
@@ -140,17 +165,24 @@ class Gui:
         # USERNAME CHECKING
         if not 13 > len(username) > 0:
             print("Invalid username length (0 - 13)")
+            self.username_label.configure(text="Username: (invalid username or password)")
             return
-        if not username.isalnum():
+        elif not username.isalnum():
             print("Invalid characters (Alphanumeric characters only)")
+            self.username_label.configure(text="Username: (invalid username or password)")
             return
+        else:
+            self.username_label.configure(text="Username:")
         # if self.username.get() doesn't exist:
         #   return
 
         # PASSWORD CHECKING
         if not 100 > len(pw) > 4:
             print("Invalid password size (4 - 100)")
+            self.username_label.configure(text="Username: (invalid username or password)")
             return
+        else:
+            self.username_label.configure(text="Username:")
         # if pw doesn't match with the password of the username:
         #   return
 
