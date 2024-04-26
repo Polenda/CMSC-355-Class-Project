@@ -1,5 +1,11 @@
 from tkinter import *
 from tkinter import ttk
+import json
+
+with open('users.json') as f:
+    VALID_USERS = json.load(f)
+    # print(VALID_USERS)
+
 
 class Gui:
     def __init__(self, root):
@@ -165,32 +171,40 @@ class Gui:
         # USERNAME CHECKING
         if not 13 > len(username) > 0:
             print("Invalid username length (0 - 13)")
-            self.username_label.configure(text="Username: (invalid username or password)")
+            self.username_label.configure(text="Username: (invalid username length)")
             return
         elif not username.isalnum():
             print("Invalid characters (Alphanumeric characters only)")
-            self.username_label.configure(text="Username: (invalid username or password)")
+            self.username_label.configure(text="Username: (alphanumeric characters only)")
             return
         else:
             self.username_label.configure(text="Username:")
-        # if self.username.get() doesn't exist:
-        #   return
 
         # PASSWORD CHECKING
         if not 100 > len(pw) > 4:
             print("Invalid password size (4 - 100)")
-            self.username_label.configure(text="Username: (invalid username or password)")
+            self.password_label.configure(text="Password: (invalid password size (4 - 100))")
             return
         else:
-            self.username_label.configure(text="Username:")
-        # if pw doesn't match with the password of the username:
-        #   return
+            self.password_label.configure(text="Password:")
 
+        if username not in VALID_USERS:
+            print(f"No such username '{username}' exists")
+            self.username_label.configure(text="Username: (no such username exists)")
+            return
+        elif VALID_USERS[username] != pw:
+            print(f"{pw} doesn't match with {VALID_USERS[username]}")
+            self.password_label.configure(text="Password: (incorrect password)")
+            return
+
+        self.username_label.configure(text="Username:")
+        self.password_label.configure(text="Password:")
         print(f"Logging in {username}")
         print(f"Password: {pw}")
 
         self.window.destroy()
         self.main_window(root)
+
 
 root = Tk()
 Gui(root)

@@ -52,24 +52,24 @@ def get_time() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
-if __name__ == '__main__':
-    while True:
-        username: str = input("> Enter your username: ")
-        if not 13 > len(username) > 0:
-            print("Please enter a username of at most 12 characters.\n")
-            continue
-        if not username.isalnum():
-            print("Please use alphanumeric characters (no special characters.)\n")
-            continue
-        break
+# if __name__ == '__main__':
+    # while True:
+    #     username: str = input("> Enter your username: ")
+    #     if not 13 > len(username) > 0:
+    #         print("Please enter a username of at most 12 characters.\n")
+    #         continue
+    #     if not username.isalnum():
+    #         print("Please use alphanumeric characters (no special characters.)\n")
+    #         continue
+    #     break
+    #
+    # address: str = input("> Server IP address: ")         # 127.0.0.1
+    # port: int = int(input("> Server port number: "))      # 45100
 
-    address: str = input("> Server IP address: ")         # 127.0.0.1
-    port: int = int(input("> Server port number: "))      # 45100
+    # client = Client(address, port, username)
 
-    client = Client(address, port, username)
-
-    receive_thread = threading.Thread(target=client.receive)
-    receive_thread.start()
-
-    write_thread = threading.Thread(target=client.write)
-    write_thread.start()
+    # receive_thread = threading.Thread(target=client.receive)
+    # receive_thread.start()
+    #
+    # write_thread = threading.Thread(target=client.write)
+    # write_thread.start()
